@@ -102,18 +102,7 @@ impl<'a, C: Converse> Authenticator<'a, C> {
     }
 
     pub fn open_session_unauthenticated(&mut self) -> PamResult<()> {
-        self.last_code = setcred(self.handle, PamFlag::ESTABLISH_CRED);
-        if self.last_code != PamReturnCode::SUCCESS {
-            return self.reset();
-        }
-
         self.last_code = open_session(self.handle, PamFlag::NONE);
-        if self.last_code != PamReturnCode::SUCCESS {
-            return self.reset();
-        }
-
-        // Follow openSSH and call pam_setcred before and after open_session
-        self.last_code = setcred(self.handle, PamFlag::REINITIALIZE_CRED);
         if self.last_code != PamReturnCode::SUCCESS {
             return self.reset();
         }
