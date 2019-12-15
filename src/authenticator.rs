@@ -101,14 +101,7 @@ impl<'a, C: Converse> Authenticator<'a, C> {
         Ok(())
     }
 
-    /// Open a session for a previously authenticated user and
-    /// initialize the environment appropriately (in PAM and regular enviroment variables).
-    pub fn open_session(&mut self) -> PamResult<()> {
-        if !self.is_authenticated {
-            //TODO: is this the right return code?
-            return Err(PamReturnCode::PERM_DENIED.into());
-        }
-
+    pub fn open_session_unauthenticated(&mut self) -> PamResult<()> {
         self.last_code = setcred(self.handle, PamFlag::ESTABLISH_CRED);
         if self.last_code != PamReturnCode::SUCCESS {
             return self.reset();
@@ -127,6 +120,17 @@ impl<'a, C: Converse> Authenticator<'a, C> {
 
         self.has_open_session = true;
         self.initialize_environment()
+    }
+
+    /// Open a session for a previously authenticated user and
+    /// initialize the environment appropriately (in PAM and regular enviroment variables).
+    pub fn open_session(&mut self) -> PamResult<()> {
+        if !self.is_authenticated {
+            //TODO: is this the right return code?
+            return Err(PamReturnCode::PERM_DENIED.into());
+        }
+
+        self.open_session_unauthenticated()
     }
 
     // Initialize the client environment with common variables.
